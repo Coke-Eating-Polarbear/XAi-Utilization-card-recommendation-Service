@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>체크카드 추천</title>
+    <!-- Font-Awesome CDN -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <style>
+        /* Your existing styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #151F28;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-bottom: 50px;
+        }
+        .card {
+            text-align: center;
+            margin: 10px;
+            width: 200px;
+            background-color: #ffffff22;
+            border-radius: 8px;
+            padding: 15px;
+            color: #fff;
+        }
+        .benefits {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .menu {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .menu li {
+            position: absolute;
+            left: 0;
+            list-style: none;
+            transform-origin: 130px;
+            transition: 0.5s;
+            transition-delay: calc(0.1s * var(--i));
+            transform: rotate(0deg) translateX(100px);
+        }
+        .menu.active li {
+            transform: rotate(calc(360deg / 8 * var(--i)));
+        }
+        .menu li a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5em;
+            border-radius: 50%;
+            transform: rotate(calc(360deg / -8 * var(--i)));
+            color: transparent;
+            transition: 1s;
+            transition-delay: 0.5s;
+            position: relative;
+        }
+        .menu.active li a {
+            color: var(--clr);
+        }
+        .menu li a::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 2px;
+            border-radius: 2px;
+            background: var(--clr);
+            transform: rotate(calc(var(--i) * 90deg)) translate(0, 25px);
+            transition: height 0.5s, width 0.5s, transform 0.5s;
+            transition-delay: 0s, 0s, 0s;
+        }
+        .menu.active li a::before {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--clr);
+            box-sizing: border-box;
+            background: #151F28;
+            z-index: -1;
+            transform: rotate(calc(var(--i) * 90deg)) translate(0px, 0px);
+            transition: transform 0.5s, height 0.5s, width 0.5s;
+            transition-delay: 1s, 1.5s, 1.5s;
+            rotate: 135deg;
+        }
+        .menu.active li:hover a::before {
+            background: var(--clr);
+            color: #151F28;
+            box-shadow: 0 0 10px var(--clr), 0 0 30px var(--clr), 0 0 50px var(--clr);
+        }
+        .menu li a::after {
+            content: "";
+            position: absolute;
+            left: 50px;
+            width: 20px;
+            height: 2px;
+            background: var(--clr);
+            z-index: -2;
+            transform: rotate(calc(var(--i) * 0deg)) translate(15px, 0px);
+            transition: 0.5s;
+            transition-delay: 0.5s;
+        }
+        .menu.active li a::after {
+            left: 10px;
+            width: 40px;
+            transform: rotate(calc(var(--i) * 45deg)) translate(50px, 0px);
+            transition-delay: 0.5s;
+        }
+        .menu.active li:hover a i {
+            position: relative;
+            color: #2f363e;
+            z-index: 1000000;
+        }
+        .menuToggle {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 2rem;
+            transition: transform 1.5s;
+        }
+        .menu.active .menuToggle {
+            transform: rotate(315deg);
+        }
+        /* Tooltip styles */
+        .menu li a .tooltip {
+            visibility: hidden;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px 10px; /* Reduced padding for smaller tooltip */
+            font-size: 0.8em; /* Smaller font size */
+            position: absolute;
+            z-index: 1;
+            bottom: 80%; /* Adjusted position */
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        .menu li a:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .box {
+        position: relative;
+        width: 200px;
+        height: 300px;
+        transform-style: preserve-3d;
+        transform: perspective(1000px);
+        animation: animate 30s linear infinite;
+        margin-top: 50px;
+        }
+
+        .box:hover {
+        animation-play-state: paused;
+        }
+        /* -------------------- */
+        /*=============== GOOGLE FONTS ===============*/
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap");
+
+/*=============== VARIABLES CSS ===============*/
+:root {
+  /*========== Colors ==========*/
+  /*Color mode HSL(hue, saturation, lightness)*/
+  --gradient-color: linear-gradient(90deg,
+                    hsl(48, 100%, 50%) 0%,
+                    hsl(28, 100%, 54%, 100%));
+  --black-color: hsl(225, 15%, 6%);
+  --reflection-color: hsla(48, 30%, 95%, .3);
+  --body-color: hsl(0, 0%, 100%);
+
+  /*========== Font and typography ==========*/
+  /*.5rem = 8px | 1rem = 16px ...*/
+  --body-font: "Montserrat", sans-serif;
+  --normal-font-size: 1rem;
+}
+
+/*=============== BASE ===============*/
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: var(--body-font);
+  font-size: var(--normal-font-size);
+  background: #151F28;
+}
+
+a {
+  text-decoration: none;
+}
+
+/*=============== BUTTON ===============*/
+.container {
+  height: 100vh;
+  margin-inline: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+.button {
+  position: relative;
+  transition: transform .4s;
+}
+
+.button__content {
+  position: relative;
+  background: var(--gradient-color);
+  padding: 1.25rem 3rem;
+  border-radius: 4rem;
+  border: 3px solid var(--black-color);
+  color: var(--black-color);
+  display: flex;
+  align-items: center;
+  column-gap: .5rem;
+  overflow: hidden;
+}
+
+.button__text {
+  font-weight: 700;
+}
+
+.button__icon {
+  font-size: 1.5rem;
+}
+
+.button__text, 
+.button__icon {
+  position: relative;
+  z-index: 2;
+}
+
+/* Reflection shapes */
+.button__reflection-1, 
+.button__reflection-2 {
+  width: 8px;
+  height: 120px;
+  background-color: var(--reflection-color);
+  rotate: 30deg;
+  position: absolute;
+  inset: 0;
+  top: 0;
+  left: -180%;
+  margin: auto;
+  transition: left .6s cubic-bezier(.2, .5, .2, 1.2);
+}
+
+.button__reflection-1::after {
+  content: "";
+  width: 26px;
+  height: 100%;
+  background-color: var(--reflection-color);
+  position: absolute;
+  top: -1rem;
+  left: 1.25rem;
+}
+
+.button__reflection-2::after {
+  content: "";
+  width: 40px;
+  height: 100%;
+  background-color: var(--reflection-color);
+  position: absolute;
+  top: -1rem;
+  left: .8rem;
+}
+
+/* Moving geometric shapes */
+.button img {
+  position: absolute;
+  opacity: 0;
+  transition: transform .5s, opacity .5s;
+}
+
+.button__star-1 {
+  width: 20px;
+  top: -14px;
+  left: -16px;
+  transform: rotate(48deg) scale(.1);
+}
+
+.button__star-2 {
+  width: 40px;
+  right: -10px;
+  top: -4px;
+  transform: rotate(-48deg) scale(.1);
+}
+
+.button__circle-1, 
+.button__circle-2 {
+  width: 8px;
+}
+
+.button__circle-1 {
+  top: -8px;
+  left: 58px;
+  transform: scale(.1);
+}
+
+.button__circle-2 {
+  right: 34px;
+  bottom: -8px;
+  transform: scale(.1);
+}
+
+.button__diamond {
+  width: 18px;
+  top: -18px;
+  right: 62px;
+  transform: scale(.1);
+}
+
+.button__triangle {
+  width: 30px;
+  left: 15px;
+  bottom: -16px;
+  transform: rotate(-48deg) scale(.1);
+}
+
+/* Gradient shadow */
+.button__shadow {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: var(--gradient-color);
+  padding: 1.25rem 3rem;
+  border-radius: 4rem;
+  border: 3px solid var(--black-color);
+  z-index: -1;
+  transition: transform .3s;
+}
+
+/* View shadow gradient */
+.button:hover .button__shadow {
+  transform: translate(-.5rem, .5rem);
+}
+
+/* Move reflection */
+.button:hover .button__reflection-1 {
+  left: 120%;
+}
+
+.button:hover .button__reflection-2 {
+  left: -70%;
+}
+
+/* View geometric shapes */
+.button:hover {
+  transform: rotate(-4deg) scale(1.1);
+}
+
+.button:hover img {
+  opacity: 1;
+}
+
+.button:hover .button__star-1 {
+  transform: scale(1.1);
+  transition-delay: .1s;
+}
+
+.button:hover .button__star-2 {
+  transform: scale(1.1);
+}
+
+.button:hover .button__circle-1 {
+  transform: translateY(-8px) scale(1.1);
+  transition-delay: .1s;
+}
+
+.button:hover .button__circle-2 {
+  transform: translate(-20px, 20px) scale(1.1);
+}
+
+.button:hover .button__diamond {
+  transform: translateY(7px) rotate(-24deg) scale(1.1);
+}
+
+.button:hover .button__triangle {
+  transform: rotate(-12deg) scale(1.1);
+}/*=============== GOOGLE FONTS ===============*/
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap");
+
+/*=============== VARIABLES CSS ===============*/
+:root {
+  /*========== Colors ==========*/
+  /*Color mode HSL(hue, saturation, lightness)*/
+  --gradient-color: linear-gradient(90deg,
+                    hsl(48, 100%, 50%) 0%,
+                    hsl(28, 100%, 54%, 100%));
+  --black-color: hsl(225, 15%, 6%);
+  --reflection-color: hsla(48, 30%, 95%, .3);
+  --body-color: hsl(0, 0%, 100%);
+
+  /*========== Font and typography ==========*/
+  /*.5rem = 8px | 1rem = 16px ...*/
+  --body-font: "Montserrat", sans-serif;
+  --normal-font-size: 1rem;
+}
+
+/*=============== BASE ===============*/
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: var(--body-font);
+  font-size: var(--normal-font-size);
+  background: #3d3d49;
+}
+
+a {
+  text-decoration: none;
+}
+
+/*=============== BUTTON ===============*/
+.container {
+  height: 50vh;
+  margin-inline: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+.button {
+  position: relative;
+  transition: transform .4s;
+}
+
+.button__content {
+  position: relative;
+  background: var(--gradient-color);
+  padding: 1.25rem 3rem;
+  border-radius: 4rem;
+  border: 3px solid var(--black-color);
+  color: var(--black-color);
+  display: flex;
+  align-items: center;
+  column-gap: .5rem;
+  overflow: hidden;
+}
+
+.button__text {
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.button__icon {
+  font-size: 1.5rem;
+}
+
+.button__text, 
+.button__icon {
+  position: relative;
+  z-index: 2;
+}
+
+/* Reflection shapes */
+.button__reflection-1, 
+.button__reflection-2 {
+  width: 8px;
+  height: 120px;
+  background-color: var(--reflection-color);
+  rotate: 30deg;
+  position: absolute;
+  inset: 0;
+  top: 0;
+  left: -180%;
+  margin: auto;
+  transition: left .6s cubic-bezier(.2, .5, .2, 1.2);
+}
+
+.button__reflection-1::after {
+  content: "";
+  width: 26px;
+  height: 100%;
+  background-color: var(--reflection-color);
+  position: absolute;
+  top: -1rem;
+  left: 1.25rem;
+}
+
+.button__reflection-2::after {
+  content: "";
+  width: 40px;
+  height: 100%;
+  background-color: var(--reflection-color);
+  position: absolute;
+  top: -1rem;
+  left: .8rem;
+}
+
+/* Moving geometric shapes */
+.button img {
+  position: absolute;
+  opacity: 0;
+  transition: transform .5s, opacity .5s;
+}
+
+.button__star-1 {
+  width: 20px;
+  top: -14px;
+  left: -16px;
+  transform: rotate(48deg) scale(.1);
+}
+
+.button__star-2 {
+  width: 40px;
+  right: -10px;
+  top: -4px;
+  transform: rotate(-48deg) scale(.1);
+}
+
+.button__circle-1, 
+.button__circle-2 {
+  width: 8px;
+}
+
+.button__circle-1 {
+  top: -8px;
+  left: 58px;
+  transform: scale(.1);
+}
+
+.button__circle-2 {
+  right: 34px;
+  bottom: -8px;
+  transform: scale(.1);
+}
+
+.button__diamond {
+  width: 18px;
+  top: -18px;
+  right: 62px;
+  transform: scale(.1);
+}
+
+.button__triangle {
+  width: 30px;
+  left: 15px;
+  bottom: -16px;
+  transform: rotate(-48deg) scale(.1);
+}
+
+/* Gradient shadow */
+.button__shadow {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: var(--gradient-color);
+  padding: 1.25rem 3rem;
+  border-radius: 4rem;
+  border: 3px solid var(--black-color);
+  z-index: -1;
+  transition: transform .3s;
+}
+
+/* View shadow gradient */
+.button:hover .button__shadow {
+  transform: translate(-.5rem, .5rem);
+}
+
+/* Move reflection */
+.button:hover .button__reflection-1 {
+  left: 120%;
+}
+
+.button:hover .button__reflection-2 {
+  left: -70%;
+}
+
+/* View geometric shapes */
+.button:hover {
+  transform: rotate(-4deg) scale(1.1);
+}
+
+.button:hover img {
+  opacity: 1;
+}
+
+.button:hover .button__star-1 {
+  transform: scale(1.1);
+  transition-delay: .1s;
+}
+
+.button:hover .button__star-2 {
+  transform: scale(1.1);
+}
+
+.button:hover .button__circle-1 {
+  transform: translateY(-8px) scale(1.1);
+  transition-delay: .1s;
+}
+
+.button:hover .button__circle-2 {
+  transform: translate(-20px, 20px) scale(1.1);
+}
+
+.button:hover .button__diamond {
+  transform: translateY(7px) rotate(-24deg) scale(1.1);
+}
+
+.button:hover .button__triangle {
+  transform: rotate(-12deg) scale(1.1);
+}
+
+@keyframes animate {
+    0% {
+        transform: perspective(1000px) rotateY(0deg);
+    }
+    100% {
+        transform: perspective(1000px) rotateY(360deg);
+    }
+}
+
+.box span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    transform: rotateY(calc(var(--i) * 45deg)) translateZ(240px);
+}
+
+.box span img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.box span .tooltip {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 8px;
+    position: absolute;
+    z-index: 2;
+    bottom: 100%; /* Position above the image */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none; /* Prevents tooltip from blocking mouse events */
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+.box span:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.card-info {
+    position: absolute;
+    top: 50%; /* Positioning based on vertical center */
+    left: 100%; /* Positioning to the right of the image */
+    transform: translateY(-50%); /* Centering vertically */
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    display: none; /* Hide by default */
+    width: 180px;
+    text-align: center;
+    z-index: 2; /* Display above other elements */
+    margin-left: 10px; /* Small margin from the image */
+}
+
+        .box span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            transform: rotateY(calc(var(--i) * 45deg)) translateZ(240px);
+            transition: transform 0.5s, z-index 0.5s;
+        }
+
+        .box span:hover .card-info {
+            display: block; /* 마우스가 올라가면 보이도록 설정 */
+        }
+
+        .box span:hover {
+            transform: rotateY(calc(var(--i) * 45deg)) translateZ(300px) scale(1.1); /* 확대 효과 */
+            z-index: 10;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>체크카드 추천</h1>
+    
+    <!-- Card Container -->
+    <div class="card-container" id="card-container">
+        <!-- 카드 정보는 JavaScript를 통해 동적으로 삽입됨 -->
+    </div>
+
+    <!-- Radial Menu -->
+    <ul class="menu">
+        <div class="menuToggle">
+            <i class="fa-solid fa-plus"></i>
+        </div>
+        <li style="--i: 0; --clr: #ff2971">
+            <a href="#" data-category="쇼핑/생활">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span class="tooltip">쇼핑/생활</span>
+            </a>
+        </li>
+        <li style="--i: 1; --clr: #fee800">
+            <a href="#" data-category="교통">
+                <i class="fa-solid fa-car-side"></i>
+                <span class="tooltip">교통</span>
+            </a>
+        </li>
+        <li style="--i: 2; --clr: #04fc43">
+            <a href="#" data-category="음식/카페">
+                <i class="fa-solid fa-mug-hot"></i>
+                <span class="tooltip">음식/카페</span>
+            </a>
+        </li>
+        <li style="--i: 3; --clr: #fe00f1">
+            <a href="#" data-category="디지털/통신">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+                <span class="tooltip">디지털/통신</span>
+            </a>
+        </li>
+        <li style="--i: 4; --clr: #00b0fe">
+            <a href="#" data-category="여행/숙박">
+                <i class="fa-solid fa-hotel"></i>
+                <span class="tooltip">여행/숙박</span>
+            </a>
+        </li>
+        <li style="--i: 5; --clr: #fea600">
+            <a href="#" data-category="금융">
+                <i class="fa-solid fa-credit-card"></i>
+                <span class="tooltip">금융</span>
+            </a>
+        </li>
+        <li style="--i: 6; --clr: #a529ff">
+            <a href="#" data-category="문화/레저">
+                <i class="fa-solid fa-theater-masks"></i>
+                <span class="tooltip">문화/레저</span>
+            </a>
+        </li>
+        <li style="--i: 7; --clr: #01bdab">
+            <a href="#" data-category="기타">
+                <i class="fa-solid fa-ellipsis"></i>
+                <span class="tooltip">기타</span>
+            </a>
+        </li>
+    </ul>
+    <div class="container">
+        <a href="/main" class="button">
+           <div class="button__content">
+              <span class="button__text">메인 화면</span>
+             
+
+              <div class="button__reflection-1"></div>
+              <div class="button__reflection-2"></div>
+           </div>
+
+           <img src="http://localhost:8000/static/star.png" alt="Star" class="button__star-1">
+            <img src="http://localhost:8000/static/헤헤오둥이.png" alt="Star" class="button__star-2">
+            <img src="http://localhost:8000/static/circle.png" alt="Circle" class="button__circle-1">
+            <img src="http://localhost:8000/static/circle.png" alt="Circle" class="button__circle-2">
+            <img src="http://localhost:8000/static/diamond.png" alt="Diamond" class="button__diamond">
+            <img src="http://localhost:8000/static/triangle.png" alt="Triangle" class="button__triangle">
+           
+           <div class="button__shadow"></div>
+        </a>
+     </div>
+    <!-- JavaScript -->
+    <script>
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const cardContainer = document.getElementById('card-container');
+
+    // CSV 파일 읽기
+    const csvData = await fetchCSV();
+    if (!csvData) {
+        console.error('CSV data could not be fetched.');
+        return;
+    }
+
+    // CSV 데이터를 파싱하여 카드 정보 가져오기
+    const cards = parseCSVAndFilterByCategory(csvData);
+
+    // 카테고리별 카드 표시 함수
+    // 카테고리별 카드 표시 함수
+    function getCardCategories(benefits) {
+    const categories = [];
+    const normalizedBenefits = benefits.map(b => normalizeString(b)); // 정규화된 혜택 리스트
+
+    for (const [category, benefitsList] of Object.entries(categoryMapping)) {
+        const normalizedBenefitsList = benefitsList.map(b => normalizeString(b));
+
+        const match = normalizedBenefits.some(benefit => normalizedBenefitsList.includes(benefit));
+
+        if (match) {
+            categories.push(category);
+        }
+    }
+    return categories;
+}
+
+function normalizeString(str) {
+    return str.replace(/['"\[\]]/g, '').trim().toLowerCase();
+}
+
+function displayCardsForCategory(category) {
+    const cardContainer = document.getElementById('card-container');
+    cardContainer.innerHTML = ''; // 기존 내용을 지웁니다.
+
+    const filteredCards = cards.filter(card => {
+        const cardCategories = getCardCategories(card.benefits);
+        return cardCategories.includes(category);
+    });
+
+    if (filteredCards.length === 0) {
+        cardContainer.innerHTML = '<p>No cards available for this category.</p>';
+        return;
+    }
+
+    // 3D 갤러리 컨테이너 생성
+    const galleryContainer = document.createElement('div');
+    galleryContainer.className = 'box';
+
+    filteredCards.forEach((card, index) => {
+        const cardSpan = document.createElement('span');
+        cardSpan.style.setProperty('--i', index);
+
+        // Create anchor element for the image
+        const cardLink = document.createElement('a');
+        cardLink.href = card.Link || '#';  // Use the Link from CSV or '#' if not available
+        cardLink.target = '_blank';  // Open in a new tab
+
+        const cardImage = document.createElement('img');
+        cardImage.src = card.Image || 'https://via.placeholder.com/200x300';
+        cardImage.alt = card.Name;
+
+        // Append image to anchor
+        cardLink.appendChild(cardImage);
+
+        // 카드 정보 박스 생성
+        const cardInfo = document.createElement('div');
+        cardInfo.className = 'card-info';
+
+        // 혜택을 각각 <li>로 변환하여 표시
+        const benefitsList = card.benefits.map(benefit => `<li>${benefit}</li>`).join('');
+        cardInfo.innerHTML = `<strong>${card.Name}</strong><br><ul>${benefitsList}</ul>`;
+
+        // 카드 정보 박스를 span에 추가
+        cardSpan.appendChild(cardInfo);
+        cardSpan.appendChild(cardLink);  // Append anchor to span
+        galleryContainer.appendChild(cardSpan);
+    });
+
+    cardContainer.appendChild(galleryContainer);
+}
+
+function ensureArray(value) {
+    if (typeof value === 'string') {
+        try {
+            // JSON 배열 형식으로 변환
+            value = JSON.parse(value);
+        } catch (e) {
+            // 변환 실패 시 단일 문자열로 처리
+            value = [value];
+        }
+    }
+    return Array.isArray(value) ? value : [value];
+}
+
+function removeQuotes(str) {
+    // 문자열의 따옴표 제거
+    return str.replace(/['"]/g, '').trim();
+}
+
+function getCardCategories(benefits) {
+    benefits = ensureArray(benefits); // benefits를 배열로 변환
+
+    const categories = [];
+
+    for (const [category, benefitsList] of Object.entries(categoryMapping)) {
+
+        // 공백 제거 및 대소문자 변환된 benefitsList
+        const normalizedBenefitsList = benefitsList.map(b => removeQuotes(b).toLowerCase());
+
+        // 공백 제거 및 대소문자 변환된 benefits
+        const normalizedBenefits = benefits.map(b => removeQuotes(b).toLowerCase());
+
+        // 공백 제거 및 대소문자 변환된 benefits와 benefitsList 비교
+        const matchedBenefits = normalizedBenefits.filter(benefit => 
+            normalizedBenefitsList.includes(benefit)
+        );
+        
+        if (matchedBenefits.length > 0) {
+            categories.push(category);
+        }
+    }
+    return categories;
+}
+
+
+
+
+    const menuItems = document.querySelectorAll('.menu li a');
+
+    menuItems.forEach(item => {
+        item.addEventListener('click', function(event) {
+            event.preventDefault();
+            const category = this.getAttribute('data-category');
+            displayCardsForCategory(category);
+        });
+    });
+
+    let menuToggle = document.querySelector(".menuToggle");
+    let menu = document.querySelector(".menu");
+
+    menuToggle.onclick = function () {
+        menu.classList.toggle("active");
+    };
+});
+
+async function fetchCSV() {
+    try {
+        const response = await fetch('http://localhost:8000/static/data/card_data_check.csv');
+        if (!response.ok) throw new Error('Network response was not ok.');
+        const data = await response.text(); // 데이터 출력 확인
+        return data;
+    } catch (error) {
+        console.error('Error fetching CSV:', error);
+        return ''; // 실패 시 빈 문자열 반환
+    }
+}
+
+function parseCSVAndFilterByCategory(csv) {
+    const lines = csv.trim().split('\n');
+    const headers = lines[0].split(',');
+    const cards = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+        const row = lines[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/); // Handling commas inside quotes
+        if (row.length !== headers.length) {
+            console.warn('Skipping row with unexpected number of columns:', row);
+            continue;
+        }
+
+        const card = {};
+        headers.forEach((header, index) => {
+            card[header.trim()] = row[index].trim();
+        });
+
+        // Clean and parse Benefits
+        if (card.Benefits) {
+            try {
+                card.benefits = card.Benefits
+                    .replace(/[\[\]"]/g, '')  // Remove square brackets and quotes
+                    .split(/,\s*(?![^()]*\))/)  // Split by comma but not within parentheses
+                    .map(s => s.trim())  // Trim spaces
+                    .filter(s => !s.includes('유의사항'));  // Exclude '유의사항'
+            } catch (e) {
+                console.error('Error parsing Benefits:', e);
+                card.benefits = [];
+            }
+        } else {
+            card.benefits = [];
+        }
+
+        cards.push(card);
+    }
+
+    return cards;
+}
+
+
+
+
+const categoryMapping = {
+    '쇼핑/생활': ['마트', '편의점', '온라인쇼핑', '주유소', '패스트푸드'],
+    '교통': ['대중교통', '택시', '기차', '고속버스', '주유소'],
+    '음식/카페': ['카페', '레스토랑', '배달앱', '음식점'],
+    '디지털/통신': ['디지털구독', '통신', '간편결제'],
+    '여행/숙박': ['항공', '호텔', '여행', '공항라운지'],
+    '금융': ['캐시백', '적립', '수수료우대', '금융'],
+    '문화/레저': ['영화', '공연/전시', '테마파크', '도서', '스포츠'],
+    '기타': ['기타', '유의사항']
+};
+
+    </script>
+</body>
+</html>
